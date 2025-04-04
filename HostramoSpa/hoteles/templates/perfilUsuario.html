@@ -1,0 +1,942 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- titulo pagina-->
+    <title>{% trans "Hoteles" %}</title>
+    <!-- importación bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="icon" type="image/x-icon" href="{% static 'images/icons/favicon.ico' %}">
+    <!-- importación style.css -->
+    <link rel="stylesheet" href="{% static '/style2.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .checked {
+            color: orange;
+        }
+        .star {
+            cursor: pointer;
+            font-size: 2em;
+        }
+        .alert-overlay {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1050;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ### INICIO NAVBAR PRINCIPAL ### -->
+    <nav class="navbar navbar-expand-md flex-column" id="navbarPrincipal">
+        <!-- barra de busqueda -->
+        <div class="search-bar" id="barraBusquedaNavbar">
+            <input class="form-control mr-sm-2 search-input" type="search" placeholder="Buscar" aria-label="Buscar">
+        </div>
+        <div class="container-fluid">
+            <!-- logo de la página -->
+            <a class="navbar-brand" href="/index/" id="logoPagina">
+                <img src="{% static '/images/icons/veranium.png' %}" alt="Logo página" />
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0" id="tamañoTextoNav">
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" id="textoOfertas">
+                            <img src="{% static '/images/icons/ofertasUnfocus.png' %}" class="img-fluid" alt="Ofertas" id="iconoOfertas">
+                            {% trans "Ofertas" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" id="textoTodos">
+                            <img src="{% static '/images/icons/todosUnfocus.png' %}" class="img-fluid" alt="Todos" id="iconoTodos">
+                            {% trans "Todos" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" id="textoFrenteAlMar">
+                            <img src="{% static '/images/icons/frente-al-marUnfocus.png' %}" class="img-fluid" alt="Frente al Mar" id="iconoFrenteAlMar">
+                            {% trans "Frente al Mar" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" id="textoCabañas">
+                            <img src="{% static '/images/icons/cabañasUnfocus.png' %}" class="img-fluid" alt="Cabañas" id="iconoCabañas">
+                            {% trans "Cabañas" %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="dropdown d-md-none" id="navbarDropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="navbarDropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% trans "Menú" %}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuButton" id="navbarDropdownMenuButton">
+                <!-- Los elementos del navbar se moverán aquí en pantallas pequeñas -->
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-filtro="ofertas" id="textoOfertas">
+                            <img src="{% static 'images/icons/ofertasUnfocus.png' %}" class="img-fluid" alt="Ofertas" id="iconoOfertas">
+                            {% trans "Ofertas" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-filtro="todos" id="textoTodos">
+                            <img src="{% static 'images/icons/todosUnfocus.png' %}" class="img-fluid" alt="Todos" id="iconoTodos">
+                            {% trans "Todos" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-filtro="frente_al_mar" id="textoFrenteAlMar">
+                            <img src="{% static 'images/icons/frente-al-marUnfocus.png' %}" class="img-fluid" alt="Frente al Mar" id="iconoFrenteAlMar">
+                            {% trans "Frente al Mar" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="#" data-filtro="cabanas" id="textoCabañas">
+                            <img src="{% static 'images/icons/cabañasUnfocus.png' %}" class="img-fluid" alt="Cabañas" id="iconoCabañas">
+                            {% trans "Cabañas" %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- menú usuario -->
+            <div class="nav-item" id="menuUsuario">
+                <div class="dropdown" id="dropdownMenuUsuario">
+                    <a class="navbar-brand dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="botonMenuUsuario">
+                        <img src="{% static '/images/icons/menuUsuarioUnfocus.png' %}" alt="Menú Usuario" width="100"/>
+                    </a>
+                    <ul class="dropdown-menu custom-dropdown" aria-labelledby="menuUsuario">
+                        {% if user.is_authenticated %}
+                            <li><a class="dropdown-item" href="{% url 'index' %}">{% trans "Inicio" %}</a></li>
+                            {% if user.is_superuser %}
+                                <li><a class="dropdown-item" href="#">{% trans "Generar reporte" %}</a></li>
+                                <li><a class="dropdown-item" href="{% url 'crear_tarjetas' %}">{% trans "Crear cupones" %}</a></li>
+                                <li><a class="dropdown-item" href="{% url 'lista_habitaciones' %}">{% trans "Generar habitaciones" %}</a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{% url 'logout' %}" id="cerrarSesion">{% trans "Cerrar sesión" %}</a></li>
+                        {% else %}
+                            <li><a class="dropdown-item" href="#" id="registrate">{% trans "Regístrate" %}</a></li>
+                            <li><a class="dropdown-item" href="#" id="iniciarSesion">{% trans "Iniciar sesión" %}</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">{% trans "Centro de ayuda" %}</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- ### FIN NAVBAR PRINCIPAL ### -->
+    
+    <!-- ### INICIO MODAL DE REGISTRO ### -->
+    <main>
+        <div class="modal fade" id="modalRegistro" tabindex="-1" aria-labelledby="modalRegistroLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <!-- Titulo del formulario de registro -->
+                    <div class="modal-header flex-column align-items-center">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <img class="img-fluid" src="{% static '/images/icons/iconoUsuario.png' %}" alt="Icono usuario" id="iconoUsuario">
+                        <h5 class="modal-title" id="modalRegistroLabel">{% trans "Regístrate" %}</h5>
+                    </div>
+                    <!-- Contenido del formulario de registro -->
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <input 
+                                type="text" 
+                                class="form-control" 
+                                id="registroNombreUsuario" 
+                                placeholder="{% trans 'Nombre de usuario' %}"
+                                required
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <input 
+                                type="email" 
+                                class="form-control" 
+                                id="registroEmail" 
+                                placeholder="{% trans 'Correo electrónico' %}"
+                                required
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <input 
+                                type="password" 
+                                class="form-control" 
+                                id="registroContraseña" 
+                                placeholder="{% trans 'Contraseña' %}"
+                                required
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <input 
+                                type="password" 
+                                class="form-control" 
+                                id="registroConfirmarContraseña" 
+                                placeholder="{% trans 'Confirmar contraseña' %}"
+                                required
+                                >
+                            </div>
+                            <div class="form-check mb-3" id="chkMayorEdad">
+                                <input class="form-check-input" type="checkbox" id="mayorEdad" required>
+                                <label class="form-check-label" for="mayorEdad">
+                                {% trans "Confirmo que soy mayor de 18 años" %}
+                                </label>
+                            </div>
+                            <div class="form-check mb-3" id="chkTerminosYCondiciones">
+                                <input class="form-check-input" type="checkbox" id="terminosCondiciones" required>
+                                <label class="form-check-label" for="terminosCondiciones">
+                                {% trans '"He leído y estoy de acuerdo con los' %}
+                                    <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
+                                    {% trans 'términos y condiciones"' %}
+                                </a>
+                                </label>
+                            </div>
+                            <div class="mb-3 text-center">
+                                <label class="form-label" id="lblPreguntaIniciarSesion">
+                                {% trans "¿Ya tienes cuenta?" %} 
+                                <a 
+                                    href="#" 
+                                    class="link-primary" 
+                                    data-bs-target="#modalIniciarSesion" 
+                                    data-bs-toggle="modal" 
+                                    >
+                                    {% trans "Inicia sesión aquí" %} 
+                                </a>
+                                </label>
+                            </div>
+                            <button 
+                                type="submit" 
+                                class="btn btn-primary"
+                                id="botonRegistro"
+                                >
+                                {% trans "Crear usuario" %} 
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ### FIN MODAL DE REGISTRO ### -->
+
+        <!-- ### INICIO MODAL INICIAR SESIÓN ###-->
+        <div class="modal fade" id="modalIniciarSesion" tabindex="-1" aria-labelledby="modalIniciarSesionLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <!-- Titulo del formulario de iniciar sesión -->
+                    <div class="modal-header flex-column align-items-center">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <img class="img-fluid" src="{% static '/images/icons/iconoUsuario.png' %}" alt="Icono usuario" id="iconoUsuario">
+                        <h5 class="modal-title" id="modalIniciarSesionLabel">{% trans "Iniciar sesión" %} </h5>
+                    </div>
+                    <!-- Contenido del formulario de iniciar sesión -->
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <input 
+                                type="email" 
+                                class="form-control" 
+                                id="registroEmail" 
+                                placeholder="{% trans 'Correo electrónico' %} "
+                                required
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <input 
+                                type="password" 
+                                class="form-control" 
+                                id="registroContraseña" 
+                                placeholder="{% trans 'Contraseña' %} "
+                                required
+                                >
+                            </div>
+                            <div class="mb-3 text-center">
+                                <label class="form-label" id="lblPreguntaRegistroUsuario">
+                                {% trans "¿Aún no tienes cuenta?" %}  
+                                <a 
+                                    href="#" 
+                                    class="link-primary" 
+                                    data-bs-target="#modalRegistro" 
+                                    data-bs-toggle="modal" 
+                                    >
+                                    {% trans "Registrate aqui" %} 
+                                </a>
+                                </label>
+                            </div>
+                            <button 
+                                type="submit" 
+                                class="btn btn-primary"
+                                id="botonIniciarSesion"
+                                >
+                                {% trans "Iniciar sesión" %} 
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ### FIN MODAL INICIAR SESIÓN ###-->
+
+        <!-- ### INICIO MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ### -->
+        <div class="modal fade" id="modalConfirmarEliminacion" tabindex="-1" aria-labelledby="modalConfirmarEliminacionLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalConfirmarEliminacionLabel">{% trans "Confirmar Eliminación" %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{% trans "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer." %}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+                        <button type="button" class="btn btn-danger" id="confirmarEliminacion">{% trans "Eliminar cuenta" %}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ### FIN MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ### -->
+
+        <!-- ### INICIO CONTAINER PERFIL DINAMICO ### -->
+        <div class="container-fluid" id="container-perfil">
+            <div class="parent">
+                <div class="div1">
+                    {% if usuario.foto_perfil %}
+                        <a href="#" id="cambiarFotoPerfilLink">
+                            <img class="img-fluid" src="{{ usuario.foto_perfil.url }}" alt="Foto de perfil">
+                        </a>
+                    {% else %}
+                        <a href="#" id="cambiarFotoPerfilLink">
+                            <img class="img-fluid" src="{% static '/images/icons/iconoUsuario.png' %}" alt="Icono usuario">
+                        </a>
+                    {% endif %}
+                    <form id="formFotoPerfil" method="POST" enctype="multipart/form-data" action="{% url 'actualizar_foto_perfil' %}">
+                        <input type="file" name="foto_perfil" id="inputFotoPerfil" style="display: none;">
+                        <button type="submit" style="display: none;">Actualizar Foto de Perfil</button>
+                    </form>
+                    <h2>{{ usuario.usuario }}</h2>
+                    <p>{{ usuario.puntos }} {% trans "puntos" %}</p>
+                </div>
+                <div class="div2">
+                    <p id="tituloUsuarioPerfil">Tu cuenta</p>
+                    <p><a href="#" id="infoPerfilLink"><img src="{% static '/images/icons/perfil/usuario.png' %}" style="width: 15px; margin-bottom: 5px;"> {% trans "informacion de perfil" %} </a></p>
+                    <p><a href="#" id="puntosPerfilLink"><img src="{% static '/images/icons/perfil/estrella.png' %}" style="width: 15px; margin-bottom: 5px;"> {% trans "canjear puntos" %} </a></p>
+                    <p><a href="#" id="clavePerfilLink"><img src="{% static '/images/icons/perfil/llave.png' %}" style="width: 15px; margin-bottom: 5px;"> {% trans "cambiar la contraseña"%}</a></p>
+                    <p><a href="#" id="vistosPerfilLink"><img src="{% static '/images/icons/perfil/vistos.png' %}" style="width: 15px; margin-bottom: 5px;"> {% trans "vistos recientemente"%}</a></p>
+                    <p><a href="#" id="historialPerfilLink" ><img src="{% static '/images/icons/perfil/historial.png' %}" style="width: 15px; margin-bottom: 5px;"> {% trans "historial de alojamiento"%}</a></p>
+                    <p><a href="#" id="ayudaPerfilLink"><img src="{% static '/images/icons/perfil/informacion.png' %}" style="width: 15px; margin-bottom: 5px;"> {% trans "Centro de ayuda"%}</a></p>
+                    <form method="post" action="{% url 'eliminar_cuenta' %}" id="formEliminarCuenta">
+                        <button type="button" id="botonEliminarCuenta" class="btn custom-btn"><img src="{% static '/images/icons/perfil/eliminar.png' %}" style="width: 15px; margin-bottom: 5px;"> {% trans "Eliminar cuenta" %}</button>
+                    </form>
+                </div>
+                <div class="div3">
+                    <p id="div3Content"></p>
+                </div>
+                <div id="successMessage" class="alert alert-success alert-overlay" role="alert">
+                    {% trans "¡Valoración enviada con éxito!" %}
+                </div>
+                <div class="modal fade" id="valoracionModal" tabindex="-1" aria-labelledby="valoracionModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="valoracionModalLabel">{% trans "Valoración de tu reserva" %}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="valoracionPuntuacion">
+                                    <form id="valoracionForm">
+                                        <div class="mb-3">
+                                            <label for="puntuacion" class="form-label">{% trans "Puntuación"%}</label>
+                                            <div id="stars" class="mb-3">
+                                                <span class="fa fa-star star" data-value="1"></span>
+                                                <span class="fa fa-star star" data-value="2"></span>
+                                                <span class="fa fa-star star" data-value="3"></span>
+                                                <span class="fa fa-star star" data-value="4"></span>
+                                                <span class="fa fa-star star" data-value="5"></span>
+                                            </div>
+                                            <input type="hidden" id="puntuacion" name="puntuacion" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="comentario" class="form-label">{% trans "Comentario"%}</label>
+                                            <textarea class="form-control" id="comentario" name="comentario" rows="3" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">{% trans "Enviar Valoración"%}</button>
+                                    </form>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        </div>
+        <!-- ### FIN CONTAINER PERFIL DINAMICO ### -->
+    </main>
+
+    <!-- ### INICIO FOOTER ### -->
+    <footer class="footer">
+        <p>{% trans "Copyright 2024. Todos los derechos reservados. ProyectoHotel." %}<br>
+            <form action="{% url 'set_language' %}" method="post">
+                {% csrf_token %}
+                <label for="language">{% trans "Idioma:" %}</label>
+                <select name="language" onchange="this.form.submit()">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% for lang in LANGUAGES %}
+                    <option value="{{ lang.0 }}"{% if lang.0 == LANGUAGE_CODE %} selected{% endif %}>
+                        {{ lang.1 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </p>
+    </footer>
+    <!-- ### FIN FOOTER ### -->
+     
+    <!-- importaciones de código -->
+    <script 
+        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" 
+        integrity="sha384-oBqDVmMz4fnFO9gybiiCiQRBzE74KAmO8E2yKFcEFP6wLCKkuxnDew+z4tlgd7cC" 
+        crossorigin="anonymous"
+    ></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"
+    ></script>
+    <script src="{% static '/js/scriptGeneral.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static '/js/hoteles.js' %}"></script>
+    <script>
+        document.getElementById('cambiarFotoPerfilLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('inputFotoPerfil').click();
+        });
+    
+        document.getElementById('inputFotoPerfil').addEventListener('change', function() {
+            document.getElementById('formFotoPerfil').submit();
+        });
+    </script>    
+    <script>
+        document.getElementById('botonEliminarCuenta').addEventListener('click', function () {
+            var myModal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminacion'));
+            myModal.show();
+        });
+    
+        document.getElementById('confirmarEliminacion').addEventListener('click', function () {
+            document.getElementById('formEliminarCuenta').submit();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('valoracionEnviada') === 'true') {
+                const successMessage = document.getElementById('successMessage');
+                if (successMessage) {
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 4000);
+                }
+                localStorage.removeItem('valoracionEnviada');
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Carga los datos de perfil dinamicamente
+            document.getElementById("infoPerfilLink").addEventListener("click", function(event) {
+                event.preventDefault();
+
+                fetch("{% url 'obtener_informacion_perfil' %}", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const date = new Date(data.date_joined);
+                    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+                    const formattedDate = date.toLocaleDateString('es-ES', options);
+                    document.getElementById("div3Content").innerHTML = `
+                        <p>Información de perfil</p>
+                        <p id="div3ContentLabel"><img src="{% static '/images/icons/perfil/usuario.png' %}" style="width: 15px; margin-bottom: 5px;"> Nombre de Usuario:</p>
+                        <p id="div3ContentData" style="padding-top: 1%">${data.username}</p>
+                        <p id="div3ContentLabel"><img src="{% static '/images/icons/perfil/fecha.png' %}" style="width: 15px; margin-bottom: 5px;"> Fecha de Creación:</p>
+                        <p id="div3ContentData" style="padding-top: 1%">${formattedDate}</p>
+                        <p id="div3ContentLabel"><img src="{% static '/images/icons/perfil/email.png' %}" style="width: 15px; margin-bottom: 5px;"> Email:</p>
+                        <p id="div3ContentData" style="padding-top: 1%">${data.email}</p>
+                    `;
+                    document.getElementById("div3Content").style.display = "block";
+                })
+                .catch(error => console.error('Error:', error));
+            });
+            //Puntos de perfil-Manejo de puntos.
+            document.getElementById("puntosPerfilLink").addEventListener("click", function(event) {
+                event.preventDefault();
+            
+                fetch("{% url 'obtener_informacion_perfil' %}", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("div3Content").innerHTML = `
+                        <p>Canjear Puntos</p>
+                        <p>Tienes ${data.puntos} puntos disponibles.</p>
+                        <ul id="opcionesLista">
+                            <li>
+                                <span class="opcionPuntos" data-puntos="100" data-descuento="10">
+                                    <img src="{% static '/images/icons/puntos/10descuento (1).png' %}">
+                                    100 pts
+                                </span>
+                                <button type="button" class="canjearCuponBtn">Canjear</button>
+                            </li>
+                            <li>
+                                <span class="opcionPuntos" data-puntos="150" data-descuento="20">
+                                    <img src="{% static '/images/icons/puntos/20descuento (1).png' %}">
+                                    150 pts
+                                </span>
+                                <button type="button" class="canjearCuponBtn">Canjear</button>
+                            </li>
+                            <li>
+                                <span class="opcionPuntos" data-puntos="700" data-descuento="60">
+                                    <img src="{% static '/images/icons/puntos/60descuento (1).png' %}">
+                                    700 pts
+                                </span>
+                                <button type="button" class="canjearCuponBtn">Canjear</button>
+                            </li>
+                            <li>
+                                <span class="opcionPuntos" data-puntos="1000" data-descuento="70">
+                                    <img src="{% static '/images/icons/puntos/70descuento (1).png' %}">
+                                    1000 pts
+                                </span>
+                                <button type="button" class="canjearCuponBtn">Canjear</button>
+                            </li>
+                        </ul>
+                        <label for="codigoPuntos">Canjear Puntos:</label>
+                        <input type="text" id="codigoPuntos" name="codigoPuntos">
+                        <button id="canjearPuntosBtn">Canjear</button>
+                    `;
+                    document.getElementById("div3Content").style.display = "block";
+                    
+                    const botonesCanje = document.querySelectorAll('.canjearCuponBtn');
+                    botonesCanje.forEach(boton => {
+                        boton.addEventListener('click', function() {
+                            const puntosRequeridos = parseInt(this.parentNode.querySelector('.opcionPuntos').getAttribute('data-puntos'));
+                            const descuento = parseInt(this.parentNode.querySelector('.opcionPuntos').getAttribute('data-descuento'));
+                            fetch("{% url 'canjear_puntos' %}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: `puntos_requeridos=${puntosRequeridos}&descuento=${descuento}`
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    alert('¡Puntos canjeados correctamente!');
+                                    window.location.reload();
+                                } else {
+                                    alert('No tienes suficientes puntos para realizar este canje.');
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        });
+                    });
+            
+                    // Add event listener for the redeem points button
+                    document.getElementById("canjearPuntosBtn").addEventListener('click', function(event) {
+                        event.preventDefault();
+                        const codigoIngresado = document.getElementById("codigoPuntos").value.trim();
+                        fetch("{% url 'validar_codigo' %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                
+                            },
+                            body: `codigo=${codigoIngresado}`
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                fetch("{% url 'agregar_puntos' %}", {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                        
+                                    },
+                                    body: `codigo=${codigoIngresado}`
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        alert(`¡Puntos canjeados correctamente para el código ${codigoIngresado}!`);
+                                        window.location.reload();
+                                    } else {
+                                        alert('Error al agregar puntos.');
+                                    }
+                                })
+                                .catch(error => console.error('Error:', error));
+                            } else {
+                                alert('El código ingresado no es válido o ya ha sido canjeado.');
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+            });
+            //Cambio de contraseña
+            document.getElementById("clavePerfilLink").addEventListener("click", function(event) {
+                event.preventDefault();
+                fetch("{% url 'obtener_informacion_perfil' %}", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("div3Content").innerHTML = `
+                        <p>Cambio de contraseña</p>
+                        <input type="password" id="currentPassword" name="currentPassword" placeholder="Contraseña Actual">
+                        <input type="password" id="newPassword" name="newPassword" placeholder="Nueva Contraseña">
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirmar Nueva Contraseña">
+                        <button id="submitPasswordChange" class="btn btn-primary">Cambiar Contraseña</button>
+                    `;
+                    document.getElementById("div3Content").style.display = "block";
+                    document.getElementById("submitPasswordChange").addEventListener("click", function() {
+                        var currentPassword = document.getElementById("currentPassword").value;
+                        var newPassword = document.getElementById("newPassword").value;
+                        var confirmPassword = document.getElementById("confirmPassword").value;
+    
+                        if (newPassword !== confirmPassword) {
+                            alert('Las nuevas contraseñas no coinciden.');
+                            return;
+                        }
+    
+                        fetch("{% url 'change_password' %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({
+                                currentPassword: currentPassword,
+                                newPassword: newPassword,
+                                confirmPassword: confirmPassword
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert(data.error);
+                            } else {
+                                alert(data.success);
+                                window.location.reload(true);
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+            });
+            //Hoteles vistos recientemente
+            document.getElementById("vistosPerfilLink").addEventListener("click", function(event) {
+                event.preventDefault();
+                fetch("{% url 'obtener_informacion_perfil' %}", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.hoteles_vistos) {
+                        const hotelesVistosIds = data.hoteles_vistos.split(',').map(id => parseInt(id.trim())).slice(0, 4);
+                        fetch("/api/hoteles/?ids=" + hotelesVistosIds.join(','))
+                        .then(response => response.json())
+                        .then(hoteles => {
+                            const hotelesOrdenados = hotelesVistosIds.map(id => hoteles.find(hotel => hotel.id === id));
+                            if (hotelesOrdenados.length > 0) {
+                                document.getElementById("div3Content").innerHTML = `
+                                    <p>Vistos recientemente</p>
+                                    <div id="vistosRecientesList">
+                                        ${hotelesOrdenados.map(hotel => hotel && hotel.foto ? `
+                                            <div class="card mb-4">
+                                                <div class="row g-0">
+                                                    <div class="col-md-12">
+                                                        <img src="${hotel.foto}" class="img-fluid rounded" alt="Imagen hotel">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">${hotel.nombre}</h5>
+                                                            <p class="card-text">${hotel.descripcion_breve}</p>
+                                                            <a href="/informacion-hotel/${hotel.id}" class="btn btn-primary">Ver más</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ` : '').join('')}
+                                    </div>
+                                `;
+                            } else {
+                                document.getElementById("div3Content").innerHTML = `
+                                <p>Vistos recientemente</p>
+                                <p>Al parecer no has visto hoteles...</p>
+                                `;
+                            }
+                            document.getElementById("div3Content").style.display = "block";
+                            console.log(hotelesOrdenados);
+                        })
+                        .catch(error => console.error('Error al obtener los datos de los hoteles:', error));
+                    } else {
+                        document.getElementById("div3Content").innerHTML = `
+                            <p>Vistos recientemente</p>
+                            <p>Al parecer no has visto hoteles...</p>
+                        `;
+                        document.getElementById("div3Content").style.display = "block";
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+            //Historial de reservas
+            document.getElementById("historialPerfilLink").addEventListener("click", function(event) {
+                event.preventDefault();
+                fetchReservasYValoraciones();
+            });
+            
+            function fetchReservasYValoraciones() {
+                fetch("{% url 'obtener_informacion_perfil_reservas' %}", {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+                    // Sort the reservations data by fecha_reserva in descending order
+                    data.reservas.sort((a, b) => new Date(b.fecha_reserva) - new Date(a.fecha_reserva));
+            
+                    document.getElementById("div3Content").innerHTML = 
+                        `<p>Reservas realizadas</p>
+                        <div id="reservasList">
+                            ${data.reservas.map(reserva => 
+                                `<div class="card mb-4">
+                                    <div class="row g-0">
+                                        <div class="col-md-12">
+                                            <img src="${reserva.hotel_foto}" class="img-fluid rounded-start" alt="Imagen hotel">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="card-body">
+                                                <h5 class="card-title">${reserva.hotel_nombre}</h5>
+                                                <p class="card-text">${reserva.hotel_descripcion_breve}</p>
+                                                <p class="card-text">Reserva creada: ${new Date(reserva.fecha_reserva).toLocaleDateString('es-ES', options)}</p>
+                                                ${renderizarBotonValorar(reserva, data.valoraciones)}
+                                                ${renderizarBotonVerReserva(reserva)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`
+                            ).join('')}
+                        </div>`;
+                    document.getElementById("div3Content").style.display = "block";
+                    document.querySelectorAll('.valorar-reserva-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const valorarUrl = e.target.getAttribute('data-valorar-url');
+                            const reservaId = e.target.getAttribute('data-reserva-id');
+                            openModal(valorarUrl, reservaId);
+                        });
+                    });
+            
+                    document.querySelectorAll('.ver-reserva-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const verReservaUrl = e.target.getAttribute('data-ver-reserva-url');
+                            window.location.href = verReservaUrl;
+                        });
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+            }
+            
+            function renderizarBotonValorar(reserva, valoraciones) {
+                console.log('Reserva:', reserva);
+                console.log('Checkout value:', reserva.checkout);
+            
+                const valorada = valoraciones.some(valoracion => valoracion.reserva_id === reserva.id);
+                console.log('Valorada:', valorada);
+            
+                if (reserva.checkout) {
+                    console.log('Checkout is true for reserva:', reserva.id);
+            
+                    if (valorada) {
+                        console.log('Reservation already valued:', reserva.id);
+                        return '<button class="btn btn-secondary" disabled>Reserva Valorada</button>';
+                    }
+            
+                    console.log('Rendering Valorar Reserva button for reserva:', reserva.id);
+                    return `<button class="btn btn-primary valorar-reserva-btn" data-valorar-url="${reserva.valorar_url}" data-reserva-id="${reserva.id}" data-bs-toggle="modal" data-bs-target="#valoracionModal">Valorar Reserva</button>`;
+                } else {
+                    console.log('Checkout is false for reserva:', reserva.id);
+                    return '';
+                }
+            }
+            
+            function renderizarBotonVerReserva(reserva) {
+                const ahora = new Date();
+                const fechaInicio = new Date(reserva.fecha_inicio);
+                const fechaSalida = reserva.fecha_salida ? new Date(reserva.fecha_salida) : null;
+
+                const ahoraUTC = new Date(ahora.toISOString().slice(0, 19) + 'Z');
+                const fechaInicioUTC = new Date(fechaInicio.toISOString().slice(0, 19) + 'Z');
+                const fechaSalidaUTC = fechaSalida ? new Date(fechaSalida.toISOString().slice(0, 19) + 'Z') : null;
+            
+                if (reserva.checkout) {
+                    console.log('Checkout is true, button will not be rendered.');
+                    return '';
+                }
+                
+                console.log('La hora de ahora essssss:', ahoraUTC);
+
+                console.log('La hora de la fecha de inicio es:', fechaInicioUTC);
+
+                console.log('La hora de la fecha de salida es:', fechaSalidaUTC);
+
+                if (ahoraUTC >= fechaInicioUTC && (!fechaSalidaUTC || ahoraUTC <= fechaSalidaUTC)) {
+                    console.log('Button will be rendered.');
+                    return `<button class="btn btn-info ver-reserva-btn mt-2" data-ver-reserva-url="${reserva.ver_reserva_url}">Ver Reserva</button>`;
+                }
+            
+                console.log('Button will not be rendered.');
+                return '';
+            }
+            
+            function openModal(valorarUrl, reservaId) {
+                const form = document.getElementById("valoracionForm");
+                if (form) {
+                    form.removeEventListener('submit', handleSubmit);
+                    $('#valoracionModal').off('hidden.bs.modal');
+                    form.addEventListener('submit', handleSubmit);
+                    $('#valoracionModal').modal('show');
+            
+                    function handleSubmit(event) {
+                        event.preventDefault();
+                        const formData = new FormData(form);
+                        fetch(valorarUrl, {
+                            method: 'POST',
+                            headers: {},
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            disableButton(reservaId);
+                            $('#valoracionModal').modal('hide');
+                            localStorage.setItem('valoracionEnviada', 'true');
+                            enviarCorreo();
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    }
+                    $('#valoracionModal').on('hidden.bs.modal', function (e) {
+                        form.reset();
+                    });
+                } else {
+                    console.error('El elemento "valoracionForm" no se encontró en el DOM.');
+                }
+            }
+            
+            function enviarCorreo() {
+                fetch('{% url "enviar_valoracion_y_tarjeta" %}', {
+                    method: 'POST',
+                    headers: {}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Correo enviado correctamente');
+                    } else {
+                        console.error('Error al enviar el correo:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al enviar el correo:', error);
+                });
+            }
+            
+            function disableButton(reservaId) {
+                const button = document.querySelector(`.valorar-reserva-btn[data-reserva-id="${reservaId}"]`);
+                if (button) {
+                    button.disabled = true;
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-secondary');
+                    button.textContent = 'Reserva Valorada';
+                }
+            }
+            //Central de ayuda
+            document.getElementById("ayudaPerfilLink").addEventListener("click", function(event) {
+                event.preventDefault();
+                document.getElementById("div3Content").innerHTML = `
+                    <p>Centro de ayuda</p>
+                    <p>Haz clic en el botón para que pueda ser asistido por nuestro equipo.</p>
+                    <button id="enviarCorreoBtn" class="btn btn-primary">Enviar Correo de Ayuda</button>
+                `;
+                document.getElementById("div3Content").style.display = "block";
+                document.getElementById("enviarCorreoBtn").addEventListener('click', function() {
+                    fetch("{% url 'enviar_correo_ayuda' %}", {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Error al enviar correo de ayuda');
+                        }
+                    })
+                    .then(data => {
+                        alert(`Se ha enviado un correo a ${data.email} para que pueda ser asistido por nuestro equipo.`);
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const stars = document.querySelectorAll('.star');
+            const puntuacionInput = document.getElementById('puntuacion');
+        
+            // Función para manejar el clic en las estrellas
+            function handleStarClick() {
+                const rating = this.getAttribute('data-value');
+                puntuacionInput.value = rating;
+        
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= rating) {
+                        s.classList.add('checked');
+                    } else {
+                        s.classList.remove('checked');
+                    }
+                });
+            }
+        
+            stars.forEach(star => {
+                star.addEventListener('click', handleStarClick);
+            });
+        });
+    </script>       
+</body>
+</html>
